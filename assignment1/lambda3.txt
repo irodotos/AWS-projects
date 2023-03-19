@@ -1,0 +1,42 @@
+ import json
+import boto3
+import uuid
+
+def lambda_handler(event, context):
+    # TODO implement
+    print("event= " , event)
+    # print("typeof event = " , type(event))
+    body = json.loads(event['body'])
+    # body = event['body']
+    print("body = " , body)
+    # print("typeof body = " , type(body))
+
+    key = body['request']['key']
+    # print("typeof key " , type(key))
+    url = body['request']['url']
+    exp_res = body['request']['expected_result']
+
+    client = boto3.client('stepfunctions')
+    transactionId = str(uuid.uuid4())
+    inputDict = { "request": {
+                    "key": key ,
+                    "url": url,
+                    "expected_result": exp_res
+                }
+            }
+    # START THE STEPFUNCTION
+    stepfunctionArn = "arn:aws:states:us-east-1:535490399091:stateMachine:MyStateMachine"
+    try:
+        response = client.start_execution(
+            stateMachineArn = stepfunctionArn ,
+            name = transactionId,
+            input = json.dumps(inputDict)
+            )
+    except Exception as e:
+        print("cant start execution of stepfunction ," , e)
+    print("respone = " , response)
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }

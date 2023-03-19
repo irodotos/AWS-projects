@@ -1,0 +1,30 @@
+import json
+import boto3
+from uuid import uuid4
+
+def lambda_handler(event, context):
+    # TODO implement
+    print("event = " , event)
+    # print("typeof event = " , type(event))
+
+    result = event['Records'][0]['Sns']['Message']
+    id = str(uuid4())
+
+    client = boto3.client('dynamodb')
+    response = client.put_item(
+        TableName='results',
+        Item={
+            "id": {
+                "S": id
+            },
+            "result":{
+                "S": result
+            }
+        }
+    )
+
+    return {
+        'statusCode': 200,
+        'body': json.dumps('Hello from Lambda!')
+    }
+
